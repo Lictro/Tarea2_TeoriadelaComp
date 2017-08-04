@@ -57,7 +57,16 @@ class DFAWindow(QMainWindow, UIAFDWindow):
                 if self.nodelist[con].num == elemento[1]:
                     index2 = con
                 con = con + 1
-            scene.addItem(Edge(self.nodelist[index1],self.nodelist[index2]))
+            edge = Edge(self.nodelist[index1],self.nodelist[index2])
+            font = QtGui.QFont()
+            font.setBold(True)
+            font.setPointSize(15)
+            line = QtWidgets.QLabel(str(elemento[2]))
+            line.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+            line.setFont(font)
+            prox = QtWidgets.QGraphicsProxyWidget(edge)
+            prox.setWidget(line)
+            scene.addItem(edge)
             index1 = 0
             index2 = 0
         self.graphicsView.setScene(scene)

@@ -103,7 +103,7 @@ class NFAWindow(QMainWindow, UIAFNWindow):
     def agregarAristas(self):
         if str(self.condTxt.text())!="":
             if int(self.origen) > -1:
-                if self.workspace.salidas(str(self.condTxt.text()), int(self.origen))[0]==False:
+                if self.workspace.salidas(str(self.condTxt.text()), int(self.origen))==False:
                     if int(self.origen) > -1 and int(self.destino) == -1:
                         self.destino = self.origen
                     if self.origenFlag:

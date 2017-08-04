@@ -2,7 +2,7 @@ from Conexion import Conexion
 from Estado import Estado
 from Alfabeto import Alfabeto
 
-class AFN:
+class Epsilon:
     def __init__(self,nom,tip):
         self.nombre = nom
         self.tipoAlfabeto = tip
@@ -155,10 +155,39 @@ class AFN:
             setSecundario = setSecundario | self.misConexiones(elemento,caracter)
         return setSecundario
 
+    def clausula(self,nodo,setNodo):
+        setNodo.add(nodo)
+        for elemento in self.misConexiones(nodo,"$"):
+            setNodo | self.clausula(elemento,setNodo)
+        return setNodo
 
-maquina = AFN("Prueba","Binario")
+    def unirClausulas(self,setNodos):
+        setSecundario = set()
+        for elemento in setNodos:
+            setSecundario = setSecundario | self.clausula(elemento,setNodo=set())
+        return setSecundario
+
+    def evaluar(self, inicio, cadena):
+        setInicial = self.clausula(inicio,setNodo=)
+
+
+
+
+maquina = Epsilon("Hola","Binario")
 maquina.agregarEstado(0,False)
-maquina.agregarEstado(1,True)
-maquina.agregarConexion(0,0,"0/1")
-maquina.agregarConexion(0,1,"0")
-print(maquina.evaluar(0,"0110"))
+maquina.agregarEstado(1,False)
+maquina.agregarEstado(2,False)
+maquina.agregarEstado(3,False)
+maquina.agregarConexion(0,1,"$")
+maquina.agregarConexion(1,2,"$")
+maquina.agregarConexion(2,3,"$")
+maquina.agregarEstado(4,False)
+maquina.agregarConexion(2,4,"1")
+maquina.agregarConexion(3,4,"$")
+maquina.agregarEstado(5,False)
+maquina.agregarConexion(4,5,"0")
+
+print(maquina.misConexiones(0,"$"))
+clau = maquina.clausula(0,setNodo=set())
+print(maquina.unirClausulas(clau))
+
