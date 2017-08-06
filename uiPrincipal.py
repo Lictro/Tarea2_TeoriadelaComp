@@ -35,8 +35,11 @@ class UIPrincipal(object):
         self.actionNEW_AFD.setObjectName("actionNEW_AFD")
         self.actionNew_AFN = QtWidgets.QAction(MainWindow)
         self.actionNew_AFN.setObjectName("actionNew_AFN")
+        self.actionNEW_AFNE = QtWidgets.QAction(MainWindow)
+        self.actionNEW_AFNE.setObjectName("actionNEW_AFNE")
         self.menuNEW.addAction(self.actionNEW_AFD)
         self.menuNEW.addAction(self.actionNew_AFN)
+        self.menuNEW.addAction(self.actionNEW_AFNE)
         self.menuFILE.addAction(self.menuNEW.menuAction())
         self.menuBar.addAction(self.menuFILE.menuAction())
         self.menuBar.setNativeMenuBar(False)
@@ -50,4 +53,4 @@ class UIPrincipal(object):
         self.menuNEW.setTitle(_translate("MainWindow", "NEW"))
         self.actionNEW_AFD.setText(_translate("MainWindow", "New AFD"))
         self.actionNew_AFN.setText(_translate("MainWindow", "New AFN"))
-
+        self.actionNEW_AFNE.setText(_translate("MainWindow", "New AFN-Epsilon"))

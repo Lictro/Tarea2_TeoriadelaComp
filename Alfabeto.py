@@ -5,7 +5,8 @@ class Alfabeto:
     def cargar(self,tipo):
         self.Caracteres = []
         archivo = open("Alfabetos/"+tipo+".txt")
-        linea=archivo.readline().rstrip('\n')
+        nombre=archivo.readline().rstrip('\n')
+        alfabeto=archivo.readline().rstrip('\n')
         while linea != '':
             self.Caracteres.append(str(linea))
             linea=archivo.readline().rstrip('\n')

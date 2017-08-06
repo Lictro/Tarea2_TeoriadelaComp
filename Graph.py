@@ -10,7 +10,7 @@ class Edge(QGraphicsItem):
 
     Type = QGraphicsItem.UserType + 2
 
-    def __init__(self, sourceNode, destNode):
+    def __init__(self, sourceNode, destNode, condicion):
         super(Edge, self).__init__()
 
         self.arrowSize = 10.0
@@ -22,6 +22,7 @@ class Edge(QGraphicsItem):
         self.source.addEdge(self)
         self.dest.addEdge(self)
         self.adjust()
+        self.condicion = condicion
 
     def type(self):
         return Edge.Type
@@ -81,8 +82,7 @@ class Edge(QGraphicsItem):
         if line.length() == 0.0:
             return
 
-        painter.setPen(QPen(Qt.black, 1, Qt.SolidLine,
-                Qt.RoundCap, Qt.RoundJoin))
+        painter.setPen(QPen(Qt.black))
         painter.drawLine(line)
 
         # Draw the arrows if there's enough room.
@@ -97,9 +97,13 @@ class Edge(QGraphicsItem):
         destArrowP2 = self.destPoint + QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize,
                                                       math.cos(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize)
 
+        condicionPoint = self.sourcePoint +QPointF(math.sin(angle+Edge.Pi/3) + self.arrowSize, math.cos(angle + Edge.Pi/3) + self.arrowSize)
+        text = self.condicion
+
         painter.setBrush(Qt.black)
         painter.drawPolygon(QPolygonF([ sourceArrowP2]))
         painter.drawPolygon(QPolygonF([line.p2(), destArrowP1, destArrowP2]))
+        painter.drawText(condicionPoint,text)
 
 
 class Node(QGraphicsItem):

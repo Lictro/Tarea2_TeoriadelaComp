@@ -3,38 +3,28 @@ from Estado import Estado
 from Alfabeto import Alfabeto
 
 class AFN:
-    def __init__(self,nom,tip):
-        self.nombre = nom
-        self.tipoAlfabeto = tip
+    def __init__(self):
         self.conexiones = []
         self.estados = []
-        self.Alfabeto = Alfabeto()
-        self.Alfabeto.cargar(self.tipoAlfabeto)
-        self.Inicio = None
-
-    def setNombre(self,nom):
-        self.nombre = nom
-
-    def setAlfabeto(self,tipo):
-        self.tipoAlfabeto = tipo
-        self.Alfabeto.cargar(tipo)
 
     def actuaAcep(self,lista):
-        for elemento in self.estados:
-            elemento.aceptacion = False
+        con = 0
+        print(lista)
+        while con>len(self.estados):
+            self.estados[con]=False
+            con = con + 1
 
-        for elemento in lista:
-            for estado in self.estados:
-                if estado.ID == elemento:
-                    estado.aceptacion = True
+        for elementos in lista:
+            con = 0
+            while con>len(self.estados):
+                if con == elementos:
+                    self.getEstado(elementos)
+                con = con + 1
+        self.imprimirEstados()
 
-    def reinicion(self):
-        self.nombre = ""
-        self.tipoAlfabeto=""
+    def reinicio(self):
         self.conexiones = []
         self.estados = []
-        self.Alfabeto = Alfabeto()
-        self.Inicio = None
 
     def agregarConexion(self,Origen,Destino,Condicion):
         self.conexiones.append(Conexion(Condicion,Origen,Destino))
@@ -155,10 +145,41 @@ class AFN:
             setSecundario = setSecundario | self.misConexiones(elemento,caracter)
         return setSecundario
 
+    def caimosBien(self,setRespuesta):
+        for elemento in setRespuesta:
+            if self.getEstado(elemento).aceptacion:
+                return True
+        return False
 
-maquina = AFN("Prueba","Binario")
-maquina.agregarEstado(0,False)
-maquina.agregarEstado(1,True)
-maquina.agregarConexion(0,0,"0/1")
-maquina.agregarConexion(0,1,"0")
-print(maquina.evaluar(0,"0110"))
+    def guardar(self,nombre):
+        arch = open("Maquinas/"+nombre+".txt", "w")
+        arch.write(str(len(self.estados))+"\n")
+        for estado in self.estados:
+            arch.write(str(estado.ID)+"\n")
+            arch.write(str(estado.aceptacion)+"\n")
+        arch.write(str(len(self.conexiones))+"\n")
+        for conexion in self.conexiones:
+            arch.write(str(conexion.origen)+"\n")
+            arch.write(str(conexion.destino)+"\n")
+            arch.write(str(conexion.condicion)+"\n")
+        arch.close()
+
+    def cargar(self,nombre):
+        self.conexiones = []
+        self.estados = []
+        archivo = open("Maquinas/"+nombre+".txt")
+        cNodos = archivo.readline().rstrip('\n')
+        con = 0
+        while con < int(cNodos):
+            id = archivo.readline().rstrip('\n')
+            acep = archivo.readline().rstrip('\n')
+            self.estados.append(Estado(int(id),acep))
+            con = con + 1
+        cConexiones = archivo.readline().rstrip('\n')
+        con = 0
+        while con < int(cConexiones):
+            origen = archivo.readline().rstrip('\n')
+            destino = archivo.readline().rstrip('\n')
+            cond = archivo.readline().rstrip('\n')
+            self.conexiones.append(Conexion(int(origen),int(destino),str(cond)))
+            con = con + 1

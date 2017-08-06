@@ -3,21 +3,12 @@ from Estado import Estado
 from Alfabeto import Alfabeto
 
 class Epsilon:
-    def __init__(self,nom,tip):
-        self.nombre = nom
-        self.tipoAlfabeto = tip
+    def __init__(self):
         self.conexiones = []
         self.estados = []
-        self.Alfabeto = Alfabeto()
-        self.Alfabeto.cargar(self.tipoAlfabeto)
-        self.Inicio = None
 
     def setNombre(self,nom):
         self.nombre = nom
-
-    def setAlfabeto(self,tipo):
-        self.tipoAlfabeto = tipo
-        self.Alfabeto.cargar(tipo)
 
     def actuaAcep(self,lista):
         for elemento in self.estados:
@@ -28,13 +19,9 @@ class Epsilon:
                 if estado.ID == elemento:
                     estado.aceptacion = True
 
-    def reinicion(self):
-        self.nombre = ""
-        self.tipoAlfabeto=""
+    def reinicio(self):
         self.conexiones = []
         self.estados = []
-        self.Alfabeto = Alfabeto()
-        self.Inicio = None
 
     def agregarConexion(self,Origen,Destino,Condicion):
         self.conexiones.append(Conexion(Condicion,Origen,Destino))
@@ -149,6 +136,12 @@ class Epsilon:
             return self.evaluarP2(self.unirSets(setEstados, cadena[cursor]), cadena, cursor + 1)
         return setEstados
 
+    def revisarSet(self,setRevisar, valor):
+        for elementos in setRevisar:
+            if elementos == valor:
+                return False
+        return True
+
     def unirSets(self,setPrincipal,caracter):
         setSecundario = set()
         for elemento in setPrincipal:
@@ -156,9 +149,10 @@ class Epsilon:
         return setSecundario
 
     def clausula(self,nodo,setNodo):
-        setNodo.add(nodo)
-        for elemento in self.misConexiones(nodo,"$"):
-            setNodo | self.clausula(elemento,setNodo)
+        if self.revisarSet(setNodo,nodo):
+            setNodo.add(nodo)
+            for elemento in self.misConexiones(nodo,"$"):
+                setNodo | self.clausula(elemento,setNodo)
         return setNodo
 
     def unirClausulas(self,setNodos):
@@ -168,26 +162,61 @@ class Epsilon:
         return setSecundario
 
     def evaluar(self, inicio, cadena):
-        setInicial = self.clausula(inicio,setNodo=)
+        setInicial = self.clausula(inicio,setNodo=set())
+        print(setInicial)
+        return self.evaluarP2(setInicial,cadena,0)
+
+    def evaluarP2(self,setEstados,cadena,cursor):
+        if len(cadena)>cursor:
+            setSecundario = self.unirSets(self.unirClausulas(setEstados),cadena[cursor])
+            print(setSecundario)
+            setTerciario = self.unirClausulas(setSecundario)
+            print(setTerciario)
+            return self.evaluarP2(self.unirClausulas(setTerciario),cadena,cursor+1)
+        return setEstados
+
+    def caimosBien(self,setRespuesta):
+        for elemento in setRespuesta:
+            if self.getEstado(elemento).aceptacion:
+                return True
+        return False
+
+    def guardar(self,nombre):
+        arch = open("Maquinas/"+nombre+".txt", "w")
+        arch.write(str(len(self.estados))+"\n")
+        for estado in self.estados:
+            arch.write(str(estado.ID)+"\n")
+            arch.write(str(estado.aceptacion)+"\n")
+        arch.write(str(len(self.conexiones))+"\n")
+        for conexion in self.conexiones:
+            arch.write(str(conexion.origen)+"\n")
+            arch.write(str(conexion.destino)+"\n")
+            arch.write(str(conexion.condicion)+"\n")
+        arch.close()
+
+    def cargar(self,nombre):
+        self.conexiones = []
+        self.estados = []
+        archivo = open("Maquinas/"+nombre)
+        cNodos = archivo.readline().rstrip('\n')
+        con = 0
+        while con < int(cNodos):
+            id = archivo.readline().rstrip('\n')
+            acep = archivo.readline().rstrip('\n')
+            self.estados.append(Estado(int(id),acep))
+            con = con + 1
+        cConexiones = archivo.readline().rstrip('\n')
+        con = 0
+        while con < int(cConexiones):
+            origen = archivo.readline().rstrip('\n')
+            destino = archivo.readline().rstrip('\n')
+            cond = archivo.readline().rstrip('\n')
+            self.conexiones.append(Conexion(str(cond),int(origen),int(destino)))
+            con = con + 1
+        archivo.close()
 
 
-
-
-maquina = Epsilon("Hola","Binario")
-maquina.agregarEstado(0,False)
-maquina.agregarEstado(1,False)
-maquina.agregarEstado(2,False)
-maquina.agregarEstado(3,False)
-maquina.agregarConexion(0,1,"$")
-maquina.agregarConexion(1,2,"$")
-maquina.agregarConexion(2,3,"$")
-maquina.agregarEstado(4,False)
-maquina.agregarConexion(2,4,"1")
-maquina.agregarConexion(3,4,"$")
-maquina.agregarEstado(5,False)
-maquina.agregarConexion(4,5,"0")
-
-print(maquina.misConexiones(0,"$"))
-clau = maquina.clausula(0,setNodo=set())
-print(maquina.unirClausulas(clau))
-
+#maquina = Epsilon()
+#maquina.cargar("Hola.txt")
+#maquina.imprimirEstados()
+#maquina.imprimirConexiones()

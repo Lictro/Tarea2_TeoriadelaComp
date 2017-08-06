@@ -4,20 +4,9 @@ from Alfabeto import Alfabeto
 import ManejadorArchivos
 
 class AFD:
-    def __init__(self,nom,tip):
-        self.nombre = nom
-        self.tipoAlfabeto = tip
+    def __init__(self):
         self.conexiones = []
         self.estados = []
-        self.Alfabeto = Alfabeto()
-        self.Inicio = None
-
-    def setNombre(self,nom):
-        self.nombre = nom
-
-    def setAlfabeto(self,tipo):
-        self.tipoAlfabeto = tipo
-        self.Alfabeto.cargar(tipo)
 
     def actuaAcep(self,lista):
         for elemento in self.estados:
@@ -28,13 +17,9 @@ class AFD:
                 if estado.ID == elemento:
                     estado.aceptacion = True
 
-    def reinicion(self):
-        self.nombre = ""
-        self.tipoAlfabeto=""
+    def reinicio(self):
         self.conexiones = []
         self.estados = []
-        self.Alfabeto = Alfabeto()
-        self.Inicio = None
 
     def agregarConexion(self,Origen,Destino,Condicion):
         self.conexiones.append(Conexion(Condicion,Origen,Destino))
@@ -46,6 +31,13 @@ class AFD:
                 self.conexiones.__delitem__(cursor)
                 break
             cursor = cursor + 1
+
+    def getConexion(self,origen,destino):
+        for elemento in self.conexiones:
+            if elemento.origen == origen:
+                if elemento.destino == destino:
+                    return elemento
+        return None
 
     def agregarEstado(self,pId,pAcepta):
         if len(self.estados) == 0:
@@ -131,10 +123,8 @@ class AFD:
                             return (True,str(caracter))
         return (False,str(-1))
 
-    def guardadito(self):
-        arch = open("Maquinas Guardadas/"+self.nombre+".txt", "w")
-        arch.write(self.nombre+"\n")
-        arch.write(self.tipoAlfabeto+"\n")
+    def guardar(self,nombre):
+        arch = open("Maquinas/"+nombre+".txt", "w")
         arch.write(str(len(self.estados))+"\n")
         for estado in self.estados:
             arch.write(str(estado.ID)+"\n")
@@ -145,3 +135,23 @@ class AFD:
             arch.write(str(conexion.destino)+"\n")
             arch.write(str(conexion.condicion)+"\n")
         arch.close()
+
+    def cargar(self,nombre):
+        self.conexiones = []
+        self.estados = []
+        archivo = open("Maquinas/"+nombre+".txt")
+        cNodos = archivo.readline().rstrip('\n')
+        con = 0
+        while con < int(cNodos):
+            id = archivo.readline().rstrip('\n')
+            acep = archivo.readline().rstrip('\n')
+            self.estados.append(Estado(int(id),acep))
+            con = con + 1
+        cConexiones = archivo.readline().rstrip('\n')
+        con = 0
+        while con < int(cConexiones):
+            origen = archivo.readline().rstrip('\n')
+            destino = archivo.readline().rstrip('\n')
+            cond = archivo.readline().rstrip('\n')
+            self.conexiones.append(Conexion(int(origen),int(destino),str(cond)))
+            con = con + 1

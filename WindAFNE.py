@@ -1,23 +1,19 @@
-import sys
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import *
-from uiAFDWin1 import *
-from MaquinaAFD import *
+from uiAFNEWin import *
+from MaquinaAFNEp import *
 
-class DFAWindow(QMainWindow, UIAFDWindow):
-    def __init__(self, parent=None):
-        super(DFAWindow,self).__init__(parent)
+class NFAEWindow(QMainWindow, UIAFNEWindow):
+    def __init__(self,parent=None):
+        super(NFAEWindow,self).__init__(parent)
         self.setupUi(self)
         self.logica()
 
     def cargarMaquina(self,maquina):
         self.workspace = maquina
-        self.workspace.setAlfabeto("Binario")
 
     def logica(self):
         self.x = 0
         self.y = 0
-        self.cargarMaquina(maquina=AFD("NADA","Binario"))
+        self.cargarMaquina(maquina=Epsilon())
         self.nodoBtn.clicked.connect(self.agregarNodo)
         self.aristaBtn.clicked.connect(self.agregarAristas)
         self.table1.cellClicked.connect(self.origenDestino)
@@ -26,11 +22,10 @@ class DFAWindow(QMainWindow, UIAFDWindow):
         self.inicioBtn.clicked.connect(self.setOrigen)
         self.borrarBtn1.clicked.connect(self.borrarNodo)
         self.borrarBtn2.clicked.connect(self.borrarEdge)
-        self.actionAlfabetico.triggered.connect(self.cambiarAlfabetico)
-        self.actionAlfanumerico.triggered.connect(self.cambiarAlfanumerico)
-        self.actionBinario.triggered.connect(self.cambiarBinario)
-        self.actionCorreo.triggered.connect(self.cambiarCorreo)
-        self.actionNumerico.triggered.connect(self.cambiarNumerico)
+        self.actionAbrir.triggered.connect(self.abrir)
+        self.actionGuardar.triggered.connect(self.guardar)
+        self.actionGuardar_y_Salir.triggered.connect(self.guardarSalir)
+        self.actionSalir.triggered.connect(self.close)
         self.evaluarBtn.clicked.connect(self.Evaluacion)
         self.nodelist = []
         self.edgelist = []
@@ -41,6 +36,46 @@ class DFAWindow(QMainWindow, UIAFDWindow):
         self.origenFlag = False
         self.destinoFlag = False
         self.countNodes = 0
+        self.fichero_actual = ""
+        self.ruta = "/Users/catedral/PycharmProjects/MacGraph/Maquinas"
+
+    def abrir(self):
+        nombre_fichero = QFileDialog.getOpenFileName(self, "Abrir Maquina", self.ruta)
+        if nombre_fichero[0] != "":
+            self.fichero_actual = nombre_fichero[0]
+            rutas = self.fichero_actual.split("/")
+            longitud = len(rutas)
+            self.workspace.reinicio()
+            self.workspace.cargar(rutas[longitud-1])
+            self.sincronizar()
+
+    def guardar(self):
+        if self.fichero_actual:
+            ruta_guardar = self.fichero_actual
+        else:
+            ruta_guardar = self.ruta
+
+        nombre_fichero = QFileDialog.getSaveFileName(self, "Guardar Maquina", ruta_guardar)
+        if nombre_fichero[0] != "":
+            self.fichero_actual = nombre_fichero[0]
+            rutas = self.fichero_actual.split("/")
+            longitud = len(rutas)
+            self.workspace.guardar(rutas[longitud-1])
+
+    def guardarSalir(self):
+        if self.fichero_actual:
+            ruta_guardar = self.fichero_actual
+        else:
+            ruta_guardar = self.ruta
+
+        nombre_fichero = QFileDialog.getSaveFileName(self, "Guardar Maquina", ruta_guardar)
+        print(nombre_fichero)
+        if nombre_fichero[0] != "":
+            self.fichero_actual = nombre_fichero[0]
+            rutas = self.fichero_actual.split("/")
+            longitud = len(rutas)
+            self.workspace.guardar(rutas[longitud-1])
+            self.close()
 
     def drawing(self):
         scene = QGraphicsScene()
@@ -48,7 +83,6 @@ class DFAWindow(QMainWindow, UIAFDWindow):
             scene.addItem(elemento)
         index1 = 0
         index2 = 0
-        cond = ""
         self.origen = "-1"
         self.destino = "-1"
         self.origenFlag = False
@@ -61,8 +95,7 @@ class DFAWindow(QMainWindow, UIAFDWindow):
                 if self.nodelist[con].num == elemento[1]:
                     index2 = con
                 con = con + 1
-            edge = Edge(self.nodelist[index1],self.nodelist[index2],elemento[2])
-            scene.addItem(edge)
+            scene.addItem(Edge(self.nodelist[index1],self.nodelist[index2],elemento[2]))
             index1 = 0
             index2 = 0
         self.graphicsView.setScene(scene)
@@ -101,13 +134,13 @@ class DFAWindow(QMainWindow, UIAFDWindow):
         self.table2.setRowCount(len(self.edgelist))
         index = 0
         while index<len(self.edgelist):
-            self.table2.setItem(index,0,QtWidgets.QTableWidgetItem(str(self.edgelist[index][0])+"---->"+self.edgelist[index][2]+"---->"+str(self.edgelist[index][1])))
+            self.table2.setItem(index,0,QtWidgets.QTableWidgetItem(str(self.edgelist[index][0])+"---->"+str(self.edgelist[index][2])+"---->"+str(self.edgelist[index][1])))
             index += 1
 
     def agregarAristas(self):
         if str(self.condTxt.text())!="":
             if int(self.origen) > -1:
-                if self.workspace.salidas(str(self.condTxt.text()), int(self.origen))[0]==False:
+                if self.workspace.salidas(str(self.condTxt.text()), int(self.origen))==False:
                     if int(self.origen) > -1 and int(self.destino) == -1:
                         self.destino = self.origen
                     if self.origenFlag:
@@ -225,11 +258,6 @@ class DFAWindow(QMainWindow, UIAFDWindow):
             if elemento[0]==numNodo or elemento[1]==numNodo:
                 self.edgelist.remove(elemento)
         self.actualizarLista2()
-        print(row, numNodo)
-        print("Tam node",len(self.nodelist))
-        print("Tam edge",len(self.edgelist))
-        print("Tam dest",len(self.destinoNodos))
-        print("Inicio",self.origenNodo)
         self.drawing()
 
     def borrarEdge(self):
@@ -272,11 +300,42 @@ class DFAWindow(QMainWindow, UIAFDWindow):
         self.actualizarLista2()
         self.drawing()
 
+
     def Evaluacion(self):
         if self.workspace.comprobarEntrada(str(self.inputTxt.text())):
-            if self.workspace.evaluar(str(self.inputTxt.text()),self.origenNodo).aceptacion:
+            inicio = self.origenNodo
+            cadena = str(self.inputTxt.text())
+            self.workspace.imprimirEstados()
+            self.workspace.imprimirConexiones()
+            setEvalua = self.workspace.evaluar(inicio,cadena)
+            if self.workspace.caimosBien(setEvalua):
                 self.Correcto()
             else:
                 self.Incorrecto()
         else:
             self.EntradaInvalida()
+
+    def sincronizar(self):
+        self.edgelist = []
+        self.nodelist = []
+        for estado in self.workspace.estados:
+            nodo = Node(self.graphicsView,estado.ID)
+            nodo.setPos(self.x,self.y)
+            font = QtGui.QFont()
+            font.setBold(True)
+            font.setPointSize(15)
+            line = QtWidgets.QLabel(str(estado.ID))
+            line.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+            line.setFont(font)
+            prox = QtWidgets.QGraphicsProxyWidget(nodo)
+            prox.setWidget(line)
+            self.nodelist.append(nodo)
+            self.x = self.x + 50
+            self.y = self.y + 50
+            self.countNodes = self.countNodes + 1
+        self.actualizarLista1()
+        for conexion in self.workspace.conexiones:
+            self.edgelist.append((conexion.origen,conexion.destino,conexion.condicion))
+        self.actualizarLista2()
+        self.workspace.imprimirEstados()
+        self.drawing()

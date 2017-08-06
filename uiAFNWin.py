@@ -3,7 +3,7 @@ from Graph import *
 
 class UIAFNWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
+        MainWindow.setObjectName("MacGraph(Autamata AFN)")
         MainWindow.resize(1002, 578)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")

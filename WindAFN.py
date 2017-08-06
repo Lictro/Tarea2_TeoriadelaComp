@@ -11,11 +11,14 @@ class NFAWindow(QMainWindow, UIAFNWindow):
         self.setupUi(self)
         self.logica()
 
+    def cargarMaquina(self,maquina):
+        self.workspace = maquina
+        self.workspace.setAlfabeto("Binario")
+
     def logica(self):
         self.x = 0
         self.y = 0
-        self.workspace = AFN("HOLA","Binario")
-        self.workspace.setAlfabeto("Binario")
+        self.cargarMaquina(maquina=AFN("NADA","Binario"))
         self.nodoBtn.clicked.connect(self.agregarNodo)
         self.aristaBtn.clicked.connect(self.agregarAristas)
         self.table1.cellClicked.connect(self.origenDestino)
@@ -58,7 +61,7 @@ class NFAWindow(QMainWindow, UIAFNWindow):
                 if self.nodelist[con].num == elemento[1]:
                     index2 = con
                 con = con + 1
-            scene.addItem(Edge(self.nodelist[index1],self.nodelist[index2]))
+            scene.addItem(Edge(self.nodelist[index1],self.nodelist[index2],elemento[2]))
             index1 = 0
             index2 = 0
         self.graphicsView.setScene(scene)
@@ -109,7 +112,7 @@ class NFAWindow(QMainWindow, UIAFNWindow):
                     if self.origenFlag:
                         if str(self.condTxt.text())!="":
                             self.edgelist.append((int(self.origen),int(self.destino),str(self.condTxt.text())))
-                            self.workspace.agregarConexion(self.origen,self.destino,str(self.condTxt.text()))
+                            self.workspace.agregarConexion(int(self.origen),int(self.destino),str(self.condTxt.text()))
                             self.origenFlag = False
                             self.destinoFlag = False
                             self.actualizarLista2()
@@ -140,13 +143,12 @@ class NFAWindow(QMainWindow, UIAFNWindow):
 
     def setOrigen(self):
         self.origenNodo = int((str(self.table1.currentItem().text()).split("Nodo "))[1])
-        print(self.origenNodo)
         self.drawing()
 
     def addDestino(self):
-        self.destinoNodos.append(int((str(self.table1.currentItem().text()).split("Nodo "))[1]))
-        print(self.destinoNodos)
-        self.workspace.actuaAcep(self.destinoNodos)
+        id = int((str(self.table1.currentItem().text()).split("Nodo "))[1])
+        self.workspace.getEstado(id).aceptacion = not self.workspace.getEstado(id).aceptacion
+        self.workspace.imprimirEstados()
         self.drawing()
 
     def MesVacio(self):
@@ -222,10 +224,6 @@ class NFAWindow(QMainWindow, UIAFNWindow):
                 self.edgelist.remove(elemento)
         self.actualizarLista2()
         print(row, numNodo)
-        print("Tam node",len(self.nodelist))
-        print("Tam edge",len(self.edgelist))
-        print("Tam dest",len(self.destinoNodos))
-        print("Inicio",self.origenNodo)
         self.drawing()
 
     def borrarEdge(self):
@@ -270,9 +268,13 @@ class NFAWindow(QMainWindow, UIAFNWindow):
 
     def Evaluacion(self):
         if self.workspace.comprobarEntrada(str(self.inputTxt.text())):
-            if self.workspace.evaluar(str(self.inputTxt.text()),self.origenNodo):
+            entrada = str(self.inputTxt.text())
+            origen = self.origenNodo
+            set = self.workspace.evaluar(origen,entrada)
+            if self.workspace.caimosBien(set):
                 self.Correcto()
             else:
                 self.Incorrecto()
         else:
             self.EntradaInvalida()
+

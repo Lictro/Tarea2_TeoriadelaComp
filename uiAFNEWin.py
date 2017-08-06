@@ -1,17 +1,9 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'AFDWin1.ui'
-#
-# Created by: PyQt5 UI code generator 5.9
-#
-# WARNING! All changes made in this file will be lost!
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Graph import *
 
-class UIAFDWindow(object):
+class UIAFNEWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MacGraph(Autamata AFD)")
+        MainWindow.setObjectName("MacGraph(Autamata AFN-Epsilon)")
         MainWindow.resize(1002, 578)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")
@@ -165,4 +157,3 @@ class UIAFDWindow(object):
         self.actionCorreo.setText(_translate("MainWindow", "Correo"))
         self.actionAlfabetico.setText(_translate("MainWindow", "Alfabetico"))
         self.actionAlfanumerico.setText(_translate("MainWindow", "Alfanumerico"))
-
